@@ -12,8 +12,8 @@ jobs:
     env:
       OUTPUT_GLOSSARY_PATH: glossary/
     steps:
-      - uses: actions/checkout@master
-        with:
+      - uses: actions/checkout@v4
+                with:
           ref: ${{ github.ref }}
 
       - name: get model2owl
@@ -21,10 +21,18 @@ jobs:
           git clone --branch feature/SM15-67  https://github.com/meaningfy-ws/model2owl.git
           pwd
 
-      - name: get-saxon
-        run: pwd && cd model2owl && make get-saxon
-
-      - name: get-jinja
+#      - name: get-saxon
+#        run: pwd && cd model2owl && make get-saxon
+    - name: Get Saxon (from Maven Central)
+      run: |
+        mkdir -p model2owl/tools
+        SAXON_VERSION=12.4
+        SAXON_JAR="Saxon-HE-${SAXON_VERSION}.jar"
+        URL="https://repo1.maven.org/maven2/net/sf/saxon/Saxon-HE/${SAXON_VERSION}/${SAXON_JAR}"
+        curl -fL --retry 5 --retry-all-errors -4 -o "model2owl/tools/${SAXON_JAR}" "$URL"
+        ln -sf "${SAXON_JAR}" model2owl/tools/saxon-he.jar
+        
+        - name: get-jinja
         run: cd model2owl && make create-virtual-env && make get-jinja
 
 
@@ -122,7 +130,7 @@ jobs:
     needs: report_and_glossary
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
 
@@ -131,8 +139,16 @@ jobs:
           git clone --branch 2.2.0 https://github.com/OP-TED/model2owl.git
           pwd
 
-      - name: get-saxon
-        run: pwd && cd model2owl && make get-saxon
+#      - name: get-saxon
+#        run: pwd && cd model2owl && make get-saxon
+- name: Get Saxon (from Maven Central)
+  run: |
+    mkdir -p model2owl/tools
+    SAXON_VERSION=12.4
+    SAXON_JAR="Saxon-HE-${SAXON_VERSION}.jar"
+    URL="https://repo1.maven.org/maven2/net/sf/saxon/Saxon-HE/${SAXON_VERSION}/${SAXON_JAR}"
+    curl -fL --retry 5 --retry-all-errors -4 -o "model2owl/tools/${SAXON_JAR}" "$URL"
+    ln -sf "${SAXON_JAR}" model2owl/tools/saxon-he.jar
 
       - name: get-rdflib
         run: cd model2owl && make create-virtual-env && make get-rdflib
