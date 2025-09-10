@@ -28,7 +28,7 @@ jobs:
           git clone --branch feature/SM15-67 https://github.com/meaningfy-ws/model2owl.git
           pwd
 
-      # Replaces the flaky SourceForge download
+      # Download Saxon 12.4
       - name: Get Saxon (from Maven Central)
         run: |
           mkdir -p model2owl/tools
@@ -38,16 +38,29 @@ jobs:
           curl -fL --retry 5 --retry-all-errors -4 -o "model2owl/tools/${SAXON_JAR}" "$URL"
           ln -sf "${SAXON_JAR}" model2owl/tools/saxon-he.jar
 
-      - name: Wire Saxon path for Makefile
+      # Download XML Resolver required by Saxon 12
+      - name: Get XML Resolver
         run: |
-          # Create the folder the Makefile expects
+          mkdir -p model2owl/tools
+          XMLRESOLVER_VERSION=5.2.2
+          URL="https://repo1.maven.org/maven2/org/xmlresolver/xmlresolver/${XMLRESOLVER_VERSION}/xmlresolver-${XMLRESOLVER_VERSION}.jar"
+          curl -fL --retry 5 --retry-all-errors -4 -o "model2owl/tools/xmlresolver-${XMLRESOLVER_VERSION}.jar" "$URL"
+
+      # Build a tiny launcher JAR that Makefile can run with `-jar`
+      - name: Create Saxon launcher jar (saxon/saxon.jar)
+        run: |
           mkdir -p model2owl/saxon
-          # Point the expected legacy name to the jar we downloaded
           SAXON_VERSION=12.4
-          ln -sf "../tools/Saxon-HE-${SAXON_VERSION}.jar" model2owl/saxon/saxon.jar
-          # (Optional) also provide old common names some scripts look for
-          ln -sf "../tools/Saxon-HE-${SAXON_VERSION}.jar" model2owl/saxon/saxon9he.jar || true
-          ln -sf "../tools/saxon-he.jar" model2owl/saxon/saxon9he.jar || true
+          XMLRESOLVER_VERSION=5.2.2
+          cat > MANIFEST.MF <<EOF
+          Manifest-Version: 1.0
+          Main-Class: net.sf.saxon.Transform
+          Class-Path: ../tools/Saxon-HE-${SAXON_VERSION}.jar ../tools/xmlresolver-${XMLRESOLVER_VERSION}.jar
+          EOF
+          jar cfm model2owl/saxon/saxon.jar MANIFEST.MF
+          rm MANIFEST.MF
+          # Compatibility link some scripts expect
+          ln -sf saxon.jar model2owl/saxon/saxon9he.jar
 
       - name: get-jinja
         run: cd model2owl && make create-virtual-env && make get-jinja
@@ -132,7 +145,7 @@ jobs:
           git clone --branch 2.2.0 https://github.com/OP-TED/model2owl.git
           pwd
 
-      # Replaces the flaky SourceForge download
+      # Download Saxon 12.4
       - name: Get Saxon (from Maven Central)
         run: |
           mkdir -p model2owl/tools
@@ -142,16 +155,29 @@ jobs:
           curl -fL --retry 5 --retry-all-errors -4 -o "model2owl/tools/${SAXON_JAR}" "$URL"
           ln -sf "${SAXON_JAR}" model2owl/tools/saxon-he.jar
 
-      - name: Wire Saxon path for Makefile
+      # Download XML Resolver required by Saxon 12
+      - name: Get XML Resolver
         run: |
-          # Create the folder the Makefile expects
+          mkdir -p model2owl/tools
+          XMLRESOLVER_VERSION=5.2.2
+          URL="https://repo1.maven.org/maven2/org/xmlresolver/xmlresolver/${XMLRESOLVER_VERSION}/xmlresolver-${XMLRESOLVER_VERSION}.jar"
+          curl -fL --retry 5 --retry-all-errors -4 -o "model2owl/tools/xmlresolver-${XMLRESOLVER_VERSION}.jar" "$URL"
+
+      # Build a tiny launcher JAR that Makefile can run with `-jar`
+      - name: Create Saxon launcher jar (saxon/saxon.jar)
+        run: |
           mkdir -p model2owl/saxon
-          # Point the expected legacy name to the jar we downloaded
           SAXON_VERSION=12.4
-          ln -sf "../tools/Saxon-HE-${SAXON_VERSION}.jar" model2owl/saxon/saxon.jar
-          # (Optional) also provide old common names some scripts look for
-          ln -sf "../tools/Saxon-HE-${SAXON_VERSION}.jar" model2owl/saxon/saxon9he.jar || true
-          ln -sf "../tools/saxon-he.jar" model2owl/saxon/saxon9he.jar || true
+          XMLRESOLVER_VERSION=5.2.2
+          cat > MANIFEST.MF <<EOF
+          Manifest-Version: 1.0
+          Main-Class: net.sf.saxon.Transform
+          Class-Path: ../tools/Saxon-HE-${SAXON_VERSION}.jar ../tools/xmlresolver-${XMLRESOLVER_VERSION}.jar
+          EOF
+          jar cfm model2owl/saxon/saxon.jar MANIFEST.MF
+          rm MANIFEST.MF
+          # Compatibility link some scripts expect
+          ln -sf saxon.jar model2owl/saxon/saxon9he.jar
 
       - name: get-rdflib
         run: cd model2owl && make create-virtual-env && make get-rdflib
