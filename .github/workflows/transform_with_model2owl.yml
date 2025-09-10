@@ -37,6 +37,21 @@ jobs:
           URL="https://repo1.maven.org/maven2/net/sf/saxon/Saxon-HE/${SAXON_VERSION}/${SAXON_JAR}"
           curl -fL --retry 5 --retry-all-errors -4 -o "model2owl/tools/${SAXON_JAR}" "$URL"
           ln -sf "${SAXON_JAR}" model2owl/tools/saxon-he.jar
+          
+
+        - name: Wire Saxon path for Makefile
+        run: |
+          # Create the folder the Makefile expects
+          mkdir -p model2owl/saxon
+
+          # Point the expected legacy name to the jar we downloaded
+          SAXON_VERSION=12.4
+          ln -sf "../tools/Saxon-HE-${SAXON_VERSION}.jar" model2owl/saxon/saxon.jar
+
+          # (Optional) also provide old common names some scripts look for
+          ln -sf "../tools/Saxon-HE-${SAXON_VERSION}.jar" model2owl/saxon/saxon9he.jar || true
+          ln -sf "../tools/saxon-he.jar" model2owl/saxon/saxon9he.jar || true
+
 
       - name: get-jinja
         run: cd model2owl && make create-virtual-env && make get-jinja
@@ -130,6 +145,20 @@ jobs:
           URL="https://repo1.maven.org/maven2/net/sf/saxon/Saxon-HE/${SAXON_VERSION}/${SAXON_JAR}"
           curl -fL --retry 5 --retry-all-errors -4 -o "model2owl/tools/${SAXON_JAR}" "$URL"
           ln -sf "${SAXON_JAR}" model2owl/tools/saxon-he.jar
+          
+                - name: Wire Saxon path for Makefile
+        run: |
+          # Create the folder the Makefile expects
+          mkdir -p model2owl/saxon
+
+          # Point the expected legacy name to the jar we downloaded
+          SAXON_VERSION=12.4
+          ln -sf "../tools/Saxon-HE-${SAXON_VERSION}.jar" model2owl/saxon/saxon.jar
+
+          # (Optional) also provide old common names some scripts look for
+          ln -sf "../tools/Saxon-HE-${SAXON_VERSION}.jar" model2owl/saxon/saxon9he.jar || true
+          ln -sf "../tools/saxon-he.jar" model2owl/saxon/saxon9he.jar || true
+
 
       - name: get-rdflib
         run: cd model2owl && make create-virtual-env && make get-rdflib
